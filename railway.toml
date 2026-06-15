@@ -1,0 +1,6 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "echo Deployed successfully"
+restartPolicyType = "NEVER"

@@ -1,0 +1,12 @@
+.env
+venv/
+__pycache__/
+*.pyc
+data/audio/*
+!data/audio/.gitkeep
+data/exports/*
+!data/exports/.gitkeep
+test_result.json
+test_planner_result.json
+test_orchestrator_result.json
+*.db

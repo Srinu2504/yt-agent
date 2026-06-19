@@ -13,7 +13,6 @@ from agents.error_classifier import (
     USER_MESSAGES,
     UNRECOVERABLE,
     RETRYABLE_WITH_BACKOFF,
-    RETRYABLE_FOR_FORMAT,
 )
 from core.download_engine import (
     extract_youtube_id,
@@ -86,7 +85,7 @@ class TranscriptAgent:
             result.logs.append(StepLog(
                 agent="transcript_agent", step="duration_check",
                 detail=msg, outcome="error",
-                error_type=ErrorType.DURATION_EXCEEDED
+                error_type=ErrorType.DURATION_EXCEEDED.value
             ))
             return result
 

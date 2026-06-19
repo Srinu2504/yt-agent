@@ -21,7 +21,7 @@ def classify(error_msg: str) -> ErrorType:
     if "requested format" in msg or "no video formats" in msg:
         return ErrorType.FORMAT_ERROR
 
-    if "429" in msg or "rate" in msg or "too many requests" in msg:
+    if "429" in msg or "rate limit" in msg or "ratelimit" in msg or "too many requests" in msg:
         return ErrorType.RATE_LIMIT
 
     if any(s in msg for s in [

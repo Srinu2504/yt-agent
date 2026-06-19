@@ -85,9 +85,6 @@ if run_btn:
         orch   = Orchestrator(verbose=False)
 
         # Patch agents to report to UI
-        orig_t_log = orch.transcript_agent._log
-        orig_p_log = orch.planner_agent._log
-
         def ui_t_log(msg):
             append_log(f"[Transcript] {msg}")
 

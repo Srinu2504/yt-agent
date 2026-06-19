@@ -135,7 +135,7 @@ class PlannerAgent:
         result.error = "PlannerAgent failed after 3 attempts."
         return result
 
-    def _parse_response(self, raw: str) -> dict | None:
+    def _parse_response(self, raw: str):
         raw = raw.strip()
 
         # Strip markdown code fences if present

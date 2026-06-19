@@ -1,5 +1,2 @@
 [phases.setup]
 nixPkgs = ["ffmpeg", "python312"]
-
-[start]
-cmd = "echo No web server yet — agents only"

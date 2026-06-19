@@ -1,0 +1,55 @@
+{
+  "plan": [
+    "linkedin_post",
+    "twitter_thread",
+    "linkedin_article",
+    "blog_post"
+  ],
+  "briefs": {
+    "linkedin_post": "Hook: 10 startups, 3 key lessons\nInsight: Talk to customers first\nTone: Honest\nAngle: Startup founder shares hard-won wisdom",
+    "twitter_thread": "Hook: 10 startups, 3 key lessons\nInsight: Talk to customers first\nTone: Honest, urgent\nAngle: Startup founder shares hard-won wisdom",
+    "linkedin_article": "Hook: 3 lessons from 10 startups\nInsight: Talk to customers first\nTone: Reflective\nAngle: Founder's hard-won wisdom",
+    "blog_post": "Hook: 15 years, 10 startups\nInsight: talk to customers first\nTone: honest advice\nAngle: Lessons from a seasoned entrepreneur"
+  },
+  "drafts": {
+    "linkedin_post": "**I just wasted 6 months of my life building a product nobody wanted**. I assumed I knew what the market needed, but I never actually asked my customers.\n\nTalking to customers first is a hard-won lesson I learned the hard way. What's the most important thing you wish you knew before starting your business? \n#startuplessons #entrepreneurship #customerfirst",
+    "twitter_thread": "1/ **10 startups, 3 key lessons I learned the hard way 🧵 Thread:**\n2/ Don't assume you know what the market needs. I wasted 6 months building a product nobody wanted.\n3/ Hire for attitude, not just skill. Engineers who care about the problem are gold.\n4/ Your first product version will be embarrassing. Ship it anyway, every day you wait helps your competitor.\n5/ Talking to customers first saves time and money. Don't start coding without feedback.\n6/ Skills can be taught, but attitude is hard to ",
+    "linkedin_article": "# 3 Hard-Won Lessons from a Seasoned Startup Founder\nAs a startup founder, navigating the complexities of building a successful business can be a daunting task. With numerous factors to consider, it's easy to get lost in the process and make costly mistakes. One of the most significant challenges founders face is the lack of guidance and mentorship, leading to a trial-by-fire approach that can be detrimental to the business. After building 10 startups over 15 years, one founder has distilled the",
+    "blog_post": "# 3 Startup Lessons I Learned the Hard Way\n*_15 years of startup experience condensed into 3 key lessons_*\n## Introduction\nAs a seasoned entrepreneur with **15 years** of experience and **10 startups** under my belt, I've learned a thing or two about what it takes to succeed. In this post, I'll share the three most important lessons I've learned the hard way, in the hopes that you can avoid making the same mistakes. \nThese lessons have been instrumental in shaping my approach to building success"
+  },
+  "failed_formats": {},
+  "logs": [
+    {
+      "agent": "writer_agent",
+      "step": "write_format",
+      "detail": "linkedin_post",
+      "outcome": "success",
+      "error_type": null,
+      "message": "57 words"
+    },
+    {
+      "agent": "writer_agent",
+      "step": "write_format",
+      "detail": "twitter_thread",
+      "outcome": "success",
+      "error_type": null,
+      "message": "146 words"
+    },
+    {
+      "agent": "writer_agent",
+      "step": "write_format",
+      "detail": "linkedin_article",
+      "outcome": "success",
+      "error_type": null,
+      "message": "661 words"
+    },
+    {
+      "agent": "writer_agent",
+      "step": "write_format",
+      "detail": "blog_post",
+      "outcome": "success",
+      "error_type": null,
+      "message": "469 words"
+    }
+  ]
+}

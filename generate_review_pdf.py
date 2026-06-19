@@ -4,10 +4,10 @@ class PDF(FPDF):
     def header(self):
         self.set_font("Helvetica", "B", 13)
         self.set_text_color(30, 30, 30)
-        self.cell(0, 10, "YT-Agent Project Code Review", align="C", new_x="LMARGIN", new_y="NEXT")
+        self.cell(0, 10, "YT-Agent Project Code Review (v2)", align="C", new_x="LMARGIN", new_y="NEXT")
         self.set_font("Helvetica", "", 9)
         self.set_text_color(120, 120, 120)
-        self.cell(0, 6, "Generated: June 16, 2026", align="C", new_x="LMARGIN", new_y="NEXT")
+        self.cell(0, 6, "Generated: June 19, 2026  |  Agents 1-4 built", align="C", new_x="LMARGIN", new_y="NEXT")
         self.ln(3)
         self.set_draw_color(200, 200, 200)
         self.line(10, self.get_y(), 200, self.get_y())
@@ -23,18 +23,12 @@ class PDF(FPDF):
         self.set_font("Helvetica", "B", 11)
         self.set_text_color(20, 80, 160)
         self.ln(3)
+        self.set_x(self.l_margin)
         self.cell(0, 8, title, new_x="LMARGIN", new_y="NEXT")
         self.set_draw_color(20, 80, 160)
         self.line(10, self.get_y(), 200, self.get_y())
         self.ln(3)
         self.set_text_color(30, 30, 30)
-
-    def body_text(self, text, bold=False):
-        self.set_x(self.l_margin)
-        self.set_font("Helvetica", "B" if bold else "", 9)
-        self.set_text_color(30, 30, 30)
-        self.multi_cell(190, 5.5, text)
-        self.ln(1)
 
     def code_text(self, text):
         self.set_x(self.l_margin)
@@ -45,6 +39,7 @@ class PDF(FPDF):
         self.ln(1)
 
     def table_header(self, cols, widths):
+        self.set_x(self.l_margin)
         self.set_font("Helvetica", "B", 8)
         self.set_fill_color(230, 237, 255)
         self.set_text_color(20, 20, 20)
@@ -53,89 +48,82 @@ class PDF(FPDF):
         self.ln()
 
     def table_row(self, cols, widths, fill=False):
+        self.set_x(self.l_margin)
         self.set_font("Helvetica", "", 8)
         self.set_fill_color(250, 250, 250)
         self.set_text_color(30, 30, 30)
         h = 6
-        x_start = self.get_x()
+        x_start = self.l_margin
         y_start = self.get_y()
         x = x_start
         for col, w in zip(cols, widths):
             self.set_xy(x, y_start)
             self.multi_cell(w, h, str(col), border=1, fill=fill)
             x += w
-        max_y = self.get_y()
-        self.set_xy(x_start, max_y)
-
-    def severity_badge(self, text, severity):
-        colors = {
-            "Medium": (220, 100, 0),
-            "Low":    (80, 140, 60),
-        }
-        r, g, b = colors.get(severity, (100, 100, 100))
-        self.set_font("Helvetica", "B", 8)
-        self.set_text_color(r, g, b)
-        self.cell(0, 6, text, new_x="LMARGIN", new_y="NEXT")
-        self.set_text_color(30, 30, 30)
+        self.set_xy(x_start, self.get_y())
 
 
 pdf = PDF()
 pdf.set_auto_page_break(auto=True, margin=15)
 pdf.add_page()
 
-# ── SECTION 1: Issues Found ──────────────────────────────────────────────────
+# ── SECTION 1: Issues Found ───────────────────────────────────────────────────
 pdf.section_title("Issues Found")
 
-issues = [
-    ("#", "File", "Line", "Issue", "Sev."),
-]
 data = [
-    ("1", "agents/error_classifier.py", "22",
-     '"rate" in msg too broad - matches "bitrate","framerate" etc. Could misclassify errors as RATE_LIMIT.',
+    ("1", "ui/app.py", "all results",
+     "Writer drafts, research briefs, and failed_formats are never displayed. Pipeline runs 4 stages but UI only shows 2.",
+     "High"),
+    ("2", "ui/app.py", "sidebar ~22",
+     "Sidebar shows Agents 3 & 4 as not built (checkbox empty) but ResearchAgent and WriterAgent ARE now built.",
      "Medium"),
-    ("2", "agents/planner_agent.py", "125",
-     'dict | None syntax requires Python 3.10+. Breaks locally on Python 3.9.',
+    ("3", "agents/research_agent.py", "~107",
+     "def _parse_brief(...) -> dict | None: uses Python 3.10+ union syntax. Breaks on Python 3.9.",
      "Medium"),
-    ("3", "agents/transcript_agent.py", "16",
-     "RETRYABLE_FOR_FORMAT imported but never used.",
+    ("4", "agents/writer_agent.py", "~115",
+     "def _write_format(...) -> str | None: uses Python 3.10+ union syntax. Breaks on Python 3.9.",
+     "Medium"),
+    ("5", "agents/research_agent.py", "~63",
+     "failed_briefs dict is created and populated in the loop but never stored in result or returned. Dead variable.",
      "Low"),
-    ("4", "agents/transcript_agent.py", "90",
-     "error_type=ErrorType.DURATION_EXCEEDED passes enum object instead of .value. Inconsistent with all other StepLog calls.",
+    ("6", "agents/writer_agent.py", "~145",
+     '"rate" in str(e).lower() uses broad check - inconsistent with the fix applied to error_classifier.py.',
      "Low"),
-    ("5", "ui/app.py", "72-73",
-     "orig_t_log and orig_p_log assigned but never read or restored.",
+    ("7", "agents/research_agent.py", "~120",
+     "Same broad rate-limit check: \"rate\" in str(e).lower() - should be \"rate limit\".",
      "Low"),
-    ("6", "nixpacks.toml", "4-5",
-     '[start] cmd says "No web server yet" - stale/misleading, railway.toml overrides it.',
+    ("8", "agents/orchestrator.py", "53",
+     'Comment says "Stages 3-6 not built yet (placeholders)" - now wrong. Stages 3 and 4 are live.',
      "Low"),
 ]
 
-widths = [8, 52, 12, 88, 18]
-headers = ["#", "File", "Line", "Issue", "Sev."]
-pdf.table_header(headers, widths)
+widths = [8, 52, 22, 82, 14]
+pdf.table_header(["#", "File", "Line", "Issue", "Sev."], widths)
 for i, row in enumerate(data):
     pdf.table_row(row, widths, fill=(i % 2 == 0))
 
 pdf.ln(4)
 
-# ── SECTION 2: Cross-Check Results ──────────────────────────────────────────
-pdf.section_title("Cross-Check Results - All Passing")
+# ── SECTION 2: Cross-Check Results ───────────────────────────────────────────
+pdf.section_title("Cross-Check Results")
 
 checks = [
     ("ui/app.py imports from agents/orchestrator.py", "PASS"),
-    ("orchestrator.py imports TranscriptAgent and PlannerAgent", "PASS"),
-    ("transcript_agent.py imports from agents/error_classifier.py", "PASS"),
-    ("transcript_agent.py imports from core/download_engine.py", "PASS"),
-    ("transcript_agent.py imports from core/transcribe_engine.py", "PASS"),
-    ("planner_agent.py imports from agents/base.py", "PASS"),
-    ("PYTHONPATH=/app resolves agents/ and core/ imports", "PASS"),
+    ("orchestrator.py imports ResearchAgent and WriterAgent", "PASS"),
+    ("orchestrator._run_writer_stage() accesses writer_result.failed_formats", "PASS"),
+    ("WriterResult.failed_formats exists in base.py", "PASS"),
+    ("All prompt files have {brief} placeholder", "PASS"),
+    ("PROMPTS_DIR in writer_agent.py correctly points to prompts/", "PASS"),
     ("requirements.txt has streamlit, groq, yt-dlp, python-dotenv, pydub", "PASS"),
-    ("railway.toml has correct startCommand with PYTHONPATH=/app", "PASS"),
+    ("railway.toml has PYTHONPATH=/app in start command", "PASS"),
     ("nixpacks.toml installs ffmpeg", "PASS"),
+    ("No hardcoded Windows paths that break on Railway Linux", "PASS"),
     ("No relative imports that break on Railway", "PASS"),
-    ("No Windows-only hardcoded paths", "PASS"),
-    ("sys.path in ui/app.py set correctly (redundant but harmless)", "PASS"),
-    ("Missing agents (publisher, research, reviewer, writer) - not imported anywhere", "PASS - safe"),
+    ("research_agent.py uses dict | None (Python 3.10+ only)", "WARN"),
+    ("writer_agent.py uses str | None (Python 3.10+ only)", "WARN"),
+    ("ui/app.py shows writer drafts to the user", "FAIL"),
+    ("ui/app.py sidebar reflects Agents 3 & 4 as built", "FAIL"),
+    ("reviewer_agent.py and publisher_agent.py exist", "N/A - safe"),
 ]
 
 pdf.table_header(["Check", "Result"], [160, 28])
@@ -144,34 +132,41 @@ for i, (check, result) in enumerate(checks):
 
 pdf.ln(4)
 
-# ── SECTION 3: Priority Fix List ────────────────────────────────────────────
+# ── SECTION 3: Priority Fix List ─────────────────────────────────────────────
 pdf.section_title("Priority Fix List")
 
 fixes = [
-    ("1", "Medium", "agents/error_classifier.py", "22",
-     "Tighten the rate-limit classifier",
-     'if "429" in msg or "rate limit" in msg or "ratelimit" in msg or "too many requests" in msg:'),
-    ("2", "Medium", "agents/planner_agent.py", "125",
-     "Replace dict | None with Optional[dict] for Python 3.9 compatibility",
-     "def _parse_response(self, raw: str) -> Optional[dict]:"),
-    ("3", "Low", "agents/transcript_agent.py", "16",
-     "Remove unused import RETRYABLE_FOR_FORMAT",
-     "Delete:  RETRYABLE_FOR_FORMAT,  from the import block"),
-    ("4", "Low", "agents/transcript_agent.py", "90",
-     "Use .value on enum for StepLog consistency",
-     "error_type=ErrorType.DURATION_EXCEEDED.value"),
-    ("5", "Low", "ui/app.py", "72-73",
-     "Remove unused variables orig_t_log and orig_p_log",
-     "Delete the two orig_*_log = ... assignment lines"),
-    ("6", "Low", "nixpacks.toml", "4-5",
-     "Remove stale [start] section - railway.toml controls the start command",
-     "Delete the [start] section entirely from nixpacks.toml"),
+    ("1", "High", "ui/app.py", "results section",
+     "Add display of research briefs, writer drafts, and failed_formats after the planner section.",
+     "Add after planner section:\nif result.writer_result and result.writer_result.drafts:\n    for fmt, draft in result.writer_result.drafts.items():\n        with st.expander(f\"{fmt}\"):\n            st.markdown(draft)"),
+    ("2", "Medium", "ui/app.py", "sidebar ~22",
+     "Update sidebar checkboxes to show Agents 3 & 4 as built.",
+     '- checkmark **Agent 3** - Research\n- checkmark **Agent 4** - Writer'),
+    ("3", "Medium", "agents/research_agent.py", "~107",
+     "Remove dict | None return annotation for Python 3.9 compatibility.",
+     "def _parse_brief(self, raw: str):"),
+    ("4", "Medium", "agents/writer_agent.py", "~115",
+     "Remove str | None return annotation for Python 3.9 compatibility.",
+     "def _write_format(self, fmt, transcript, title, brief, config):"),
+    ("5", "Low", "agents/research_agent.py", "~63",
+     "Remove dead failed_briefs variable (never stored or returned).",
+     "Delete:  failed_briefs = {}  and all failed_briefs[fmt] = ... assignments"),
+    ("6", "Low", "agents/writer_agent.py", "~145",
+     "Tighten inline rate-limit check to match error_classifier fix.",
+     'if "429" in str(e) or "rate limit" in str(e).lower():'),
+    ("7", "Low", "agents/research_agent.py", "~120",
+     "Same inline rate-limit tightening.",
+     'if "429" in str(e) or "rate limit" in str(e).lower():'),
+    ("8", "Low", "agents/orchestrator.py", "53",
+     "Update stale comment.",
+     '# Stages 3-4 live; Stages 5-6 not built yet'),
 ]
 
 for num, sev, file_, line, desc, fix in fixes:
     pdf.set_font("Helvetica", "B", 9)
-    sev_color = (200, 80, 0) if sev == "Medium" else (60, 120, 50)
+    sev_color = (180, 30, 30) if sev == "High" else (200, 80, 0) if sev == "Medium" else (60, 120, 50)
     pdf.set_text_color(*sev_color)
+    pdf.set_x(pdf.l_margin)
     pdf.cell(0, 6, f"Fix {num} - {sev}  |  {file_}  (line {line})", new_x="LMARGIN", new_y="NEXT")
     pdf.set_text_color(30, 30, 30)
     pdf.set_font("Helvetica", "", 9)
@@ -180,28 +175,21 @@ for num, sev, file_, line, desc, fix in fixes:
     pdf.code_text(fix)
     pdf.ln(1)
 
-# ── SECTION 4: Files Not Yet Created ────────────────────────────────────────
-pdf.section_title("Files Not Yet Created (Future Stages)")
+# ── SECTION 4: Current Build Status ──────────────────────────────────────────
+pdf.section_title("Current Build Status")
 
-pdf.set_font("Helvetica", "", 9)
-pdf.set_text_color(30, 30, 30)
-missing = [
-    "agents/publisher_agent.py  - Stage 6",
-    "agents/research_agent.py   - Stage 3",
-    "agents/reviewer_agent.py   - Stage 5",
-    "agents/writer_agent.py     - Stage 4",
+status_rows = [
+    ("Agent 1", "TranscriptAgent", "agents/transcript_agent.py", "BUILT"),
+    ("Agent 2", "PlannerAgent",    "agents/planner_agent.py",    "BUILT"),
+    ("Agent 3", "ResearchAgent",   "agents/research_agent.py",   "BUILT"),
+    ("Agent 4", "WriterAgent",     "agents/writer_agent.py",     "BUILT"),
+    ("Agent 5", "ReviewerAgent",   "agents/reviewer_agent.py",   "NOT YET"),
+    ("Agent 6", "PublisherAgent",  "agents/publisher_agent.py",  "NOT YET"),
 ]
-for m in missing:
-    pdf.cell(5)
-    pdf.cell(0, 6, f"  {m}  (not imported anywhere - safe to add later)", new_x="LMARGIN", new_y="NEXT")
 
-pdf.ln(4)
-pdf.set_font("Helvetica", "I", 9)
-pdf.set_text_color(100, 100, 100)
-pdf.set_x(pdf.l_margin)
-pdf.multi_cell(190, 5.5,
-    "None of the missing agent files are imported anywhere in the current codebase. "
-    "The Orchestrator holds None placeholders for them. No breaking issues at this stage.")
+pdf.table_header(["Stage", "Class", "File", "Status"], [20, 40, 90, 28])
+for i, row in enumerate(status_rows):
+    pdf.table_row(row, [20, 40, 90, 28], fill=(i % 2 == 0))
 
 out_path = r"c:\Users\user\Downloads\yt-agent\yt_agent_code_review.pdf"
 pdf.output(out_path)

@@ -21,9 +21,9 @@ with st.sidebar:
     st.markdown("### Agents")
     st.markdown("""
     - ✅ **Agent 1** — Transcript
-    - ✅ **Agent 2** — Planner  
-    - ⬜ Agent 3 — Research
-    - ⬜ Agent 4 — Writer
+    - ✅ **Agent 2** — Planner
+    - ✅ **Agent 3** — Research
+    - ✅ **Agent 4** — Writer
     - ⬜ Agent 5 — Reviewer
     - ⬜ Agent 6 — Publisher
     """)
@@ -146,6 +146,51 @@ if run_btn:
 
     elif result.planner_result and result.planner_result.status == "failed":
         st.error(f"Planner Agent failed: {result.planner_result.error}")
+
+    format_icons = {
+        "linkedin_post":    "💼 LinkedIn Post",
+        "linkedin_article": "📝 LinkedIn Article",
+        "twitter_thread":   "🐦 Twitter Thread",
+        "blog_post":        "📖 Blog Post",
+    }
+
+    if result.research_result and result.research_result.status == "success":
+        with st.expander("🔬 Research briefs", expanded=False):
+            for fmt, brief in result.research_result.briefs.items():
+                st.markdown(f"**{format_icons.get(fmt, fmt)}**")
+                st.caption(brief)
+                st.divider()
+
+    if result.writer_result and result.writer_result.status == "success":
+        st.subheader("✍️ Generated content")
+
+        for fmt, draft in result.writer_result.drafts.items():
+            icon_label = format_icons.get(fmt, fmt)
+            with st.expander(f"{icon_label}", expanded=True):
+                st.markdown(draft)
+                st.caption(f"Words: {len(draft.split())} · Characters: {len(draft)}")
+                st.divider()
+                c1, c2 = st.columns(2)
+                with c1:
+                    st.download_button(
+                        "⬇️ TXT",
+                        draft.encode("utf-8"),
+                        file_name=f"{fmt}.txt",
+                        mime="text/plain",
+                        use_container_width=True,
+                        key=f"dl_txt_{fmt}"
+                    )
+                with c2:
+                    if st.button("📋 Copy", use_container_width=True, key=f"copy_{fmt}"):
+                        st.code(draft, language=None)
+
+        if result.writer_result.failed_formats:
+            st.warning("Some formats failed to generate:")
+            for fmt, reason in result.writer_result.failed_formats.items():
+                st.caption(f"❌ {format_icons.get(fmt, fmt)}: {reason}")
+
+    elif result.writer_result and result.writer_result.status == "failed":
+        st.error(f"Writer Agent failed: {result.writer_result.error}")
 
     # ── Full agent log ─────────────────────────────────────────────────────
     if result.full_log:

@@ -6,6 +6,8 @@ from agents.base import (
 )
 from agents.transcript_agent import TranscriptAgent
 from agents.planner_agent import PlannerAgent
+from agents.research_agent import ResearchAgent
+from agents.writer_agent import WriterAgent
 
 
 class Orchestrator:
@@ -13,8 +15,8 @@ class Orchestrator:
     def __init__(self, verbose: bool = True):
         self.transcript_agent = TranscriptAgent(verbose=verbose)
         self.planner_agent    = PlannerAgent(verbose=verbose)
-        self.research_agent   = None
-        self.writer_agent     = None
+        self.research_agent   = ResearchAgent(verbose=verbose)
+        self.writer_agent     = WriterAgent(verbose=verbose)
         self.reviewer_agent   = None
         self.publisher_agent  = None
         self.verbose          = verbose
@@ -50,7 +52,7 @@ class Orchestrator:
             self._log("Planner chose no formats — stopping pipeline")
             return result
 
-        # Stages 3-6 — not built yet (placeholders)
+        # Stages 3-4 live — Stages 5-6 not built yet
         result = self._run_research_stage(result)
         result = self._run_writer_stage(result)
         result = self._run_reviewer_stage(result)
@@ -95,13 +97,43 @@ class Orchestrator:
         return result
 
     def _run_research_stage(self, result):
-        # ResearchAgent not built yet — skip silently
-        self._log("Stage 3 — ResearchAgent (not built yet, skipping)")
+        self._log("Stage 3 — ResearchAgent")
+        transcript     = result.transcript_result.transcript
+        formats_chosen = result.planner_result.formats_chosen
+
+        research_result = self.research_agent.run(transcript, formats_chosen)
+        result.research_result = research_result
+        result.full_log.extend(research_result.logs)
+
+        if research_result.status == STATUS_FAILED:
+            self._log("ResearchAgent failed — Writer will use raw transcript")
+        else:
+            self._log(f"Research briefs ready for: {list(research_result.briefs.keys())}")
+
         return result
 
     def _run_writer_stage(self, result):
-        # WriterAgent not built yet — skip silently
-        self._log("Stage 4 — WriterAgent (not built yet, skipping)")
+        self._log("Stage 4 — WriterAgent")
+        transcript     = result.transcript_result.transcript
+        title          = result.transcript_result.title
+        formats_chosen = result.planner_result.formats_chosen
+        briefs         = result.research_result.briefs if result.research_result else {}
+
+        writer_result = self.writer_agent.run(
+            transcript, title, formats_chosen, briefs
+        )
+        result.writer_result = writer_result
+        result.full_log.extend(writer_result.logs)
+
+        if writer_result.status == STATUS_FAILED:
+            result.status          = STATUS_FAILED
+            result.failed_at_stage = "writer"
+            self._log("WriterAgent failed — all formats failed")
+        else:
+            self._log(f"Drafts ready: {list(writer_result.drafts.keys())}")
+            if writer_result.failed_formats:
+                self._log(f"Failed formats: {list(writer_result.failed_formats.keys())}")
+
         return result
 
     def _run_reviewer_stage(self, result):

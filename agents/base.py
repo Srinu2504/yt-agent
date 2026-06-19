@@ -46,6 +46,7 @@ class ResearchResult:
 class WriterResult:
     status: str
     drafts: dict               = field(default_factory=dict)
+    failed_formats: dict       = field(default_factory=dict)
     error: Optional[str]       = None
     logs: List[StepLog]        = field(default_factory=list)
 

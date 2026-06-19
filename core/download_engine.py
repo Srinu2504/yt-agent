@@ -1,5 +1,6 @@
 import os
 import re
+import shutil
 import tempfile
 import yt_dlp
 from dotenv import load_dotenv
@@ -28,6 +29,16 @@ def _get_cookies_file():
     content = os.environ.get("YOUTUBE_COOKIES", "").strip()
     if not content:
         return None
+
+    # If content is a file path, read from file
+    if os.path.exists(content):
+        with open(content, encoding="utf-8") as f:
+            content = f.read().strip()
+
+    # Must start with Netscape header or a domain line
+    if not content.startswith("#") and not content.startswith("."):
+        return None
+
     try:
         tmp = tempfile.NamedTemporaryFile(
             mode="w", suffix=".txt", delete=False, encoding="utf-8"
@@ -43,11 +54,22 @@ def _get_cookies_file():
 
 def _base_opts() -> tuple:
     cookies_file = _get_cookies_file()
+    # android/ios/tv_embedded clients work without a JS runtime.
+    # web client requires JS — node is provided as fallback.
+    node_path = shutil.which("node") or r"C:\Program Files\nodejs\node.exe"
+    js_runtimes = {"node": {"path": node_path}} if os.path.exists(node_path) else {}
+
     opts = {
         "quiet": True,
         "no_warnings": True,
         "socket_timeout": 30,
         "retries": 2,
+        "extractor_args": {
+            "youtube": {
+                "player_client": ["android", "ios", "tv_embedded", "web"],
+            }
+        },
+        "js_runtimes": js_runtimes,
         "http_headers": {
             "User-Agent": (
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "

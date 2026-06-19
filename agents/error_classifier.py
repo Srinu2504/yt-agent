@@ -15,7 +15,7 @@ class ErrorType(str, Enum):
 def classify(error_msg: str) -> ErrorType:
     msg = error_msg.lower()
 
-    if "sign in" in msg or "confirm you" in msg or "confirm you're not a bot" in msg:
+    if "sign in" in msg or "confirm you're not a bot" in msg or "sign in to confirm" in msg:
         return ErrorType.BOT_DETECTED
 
     if (

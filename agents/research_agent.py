@@ -1,4 +1,6 @@
 import os
+import re
+import json
 import time
 from groq import Groq
 from dotenv import load_dotenv
@@ -45,6 +47,7 @@ class ResearchAgent:
 
     def __init__(self, verbose: bool = True):
         self.verbose = verbose
+        self.client  = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 
     def _log(self, msg: str):
         if self.verbose:
@@ -101,7 +104,7 @@ class ResearchAgent:
 
         return result
 
-    def _research_format(self, fmt: str, transcript: str) -> str | None:
+    def _research_format(self, fmt: str, transcript: str):
         fmt_desc = FORMAT_DESCRIPTIONS.get(fmt, fmt)
         user_msg = (
             f"Format: {fmt_desc}\n\n"
@@ -110,8 +113,7 @@ class ResearchAgent:
 
         for attempt in range(1, 4):
             try:
-                client   = Groq(api_key=GROQ_API_KEY)
-                response = client.chat.completions.create(
+                response = self.client.chat.completions.create(
                     model=LLM_MODEL,
                     messages=[
                         {"role": "system", "content": SYSTEM_PROMPT},
@@ -147,7 +149,6 @@ class ResearchAgent:
         return None
 
     def _parse_brief(self, raw: str):
-        import json, re
         raw = raw.strip()
         if raw.startswith("```"):
             lines = [l for l in raw.split("\n") if not l.startswith("```")]

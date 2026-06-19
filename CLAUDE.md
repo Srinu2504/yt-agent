@@ -27,8 +27,8 @@ agents/
   orchestrator.py      — coordinates all 6 agents in sequence
   transcript_agent.py  — Agent 1: download + transcribe with error reasoning
   planner_agent.py     — Agent 2: LLM decides which formats to generate
-  research_agent.py    — Agent 3: stub only, not yet built
-  writer_agent.py      — Agent 4: stub only, not yet built
+  research_agent.py    — Agent 3: BUILT — one Groq call per format, returns brief dict
+  writer_agent.py      — Agent 4: BUILT — format loop, Approach 3, partial success supported
   reviewer_agent.py    — Agent 5: stub only, not yet built
   publisher_agent.py   — Agent 6: stub only, not yet built
 
@@ -82,11 +82,14 @@ LLM_MODEL                 — optional, default llama-3.3-70b-versatile
 6. ResearchAgent failure is non-fatal — Writer falls back to raw transcript
 
 ## What agents currently do when called
-- research_agent: raises NotImplementedError (stub)
-- writer_agent: raises NotImplementedError (stub)
-- reviewer_agent: raises NotImplementedError (stub)
-- publisher_agent: raises NotImplementedError (stub)
-- orchestrator stages 3-6: skip silently with log message
+- transcript_agent: downloads audio, classifies errors, transcribes
+- planner_agent: one LLM call, returns formats_chosen list
+- research_agent: one LLM call per format, returns briefs dict
+- writer_agent: one LLM call per format using brief, returns drafts dict
+- reviewer_agent: raises NotImplementedError (stub — not yet built)
+- publisher_agent: raises NotImplementedError (stub — not yet built)
+- orchestrator stages 1-4: fully live
+- orchestrator stages 5-6: skip silently with log message
 
 ## Known issues
 - 502 Bad Gateway on Railway — likely PYTHONPATH or import error on startup

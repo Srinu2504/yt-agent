@@ -15,13 +15,17 @@ class ErrorType(str, Enum):
 def classify(error_msg: str) -> ErrorType:
     msg = error_msg.lower()
 
-    if "sign in" in msg or "bot" in msg or "confirm you" in msg:
+    if "sign in" in msg or "confirm you" in msg or "confirm you're not a bot" in msg:
         return ErrorType.BOT_DETECTED
 
-    if "requested format" in msg or "no video formats" in msg:
+    if (
+        "requested format is not available" in msg
+        or "no video formats" in msg
+        or "no formats found" in msg
+    ):
         return ErrorType.FORMAT_ERROR
 
-    if "429" in msg or "rate limit" in msg or "ratelimit" in msg or "too many requests" in msg:
+    if "429" in msg or "rate limit" in msg or "too many requests" in msg:
         return ErrorType.RATE_LIMIT
 
     if any(s in msg for s in [

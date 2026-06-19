@@ -45,6 +45,7 @@ class WriterAgent:
 
     def __init__(self, verbose: bool = True):
         self.verbose = verbose
+        self.client  = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 
     def _log(self, msg: str):
         if self.verbose:
@@ -142,8 +143,7 @@ class WriterAgent:
 
         for attempt in range(1, 4):
             try:
-                client   = Groq(api_key=GROQ_API_KEY)
-                response = client.chat.completions.create(
+                response = self.client.chat.completions.create(
                     model=LLM_MODEL,
                     messages=[
                         {"role": "system", "content": system_prompt},

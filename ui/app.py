@@ -55,6 +55,13 @@ st.divider()
 
 # ── Pipeline ──────────────────────────────────────────────────────────────────
 if run_btn:
+    format_icons = {
+        "linkedin_post":    "💼 LinkedIn Post",
+        "linkedin_article": "📝 LinkedIn Article",
+        "twitter_thread":   "🐦 Twitter Thread",
+        "blog_post":        "📖 Blog Post",
+    }
+
     if not url_input.strip():
         st.error("Please enter a YouTube URL.")
         st.stop()
@@ -91,8 +98,16 @@ if run_btn:
         def ui_p_log(msg):
             append_log(f"[Planner]    {msg}")
 
+        def ui_r_log(msg):
+            append_log(f"[Research]   {msg}")
+
+        def ui_w_log(msg):
+            append_log(f"[Writer]     {msg}")
+
         orch.transcript_agent._log = ui_t_log
         orch.planner_agent._log    = ui_p_log
+        orch.research_agent._log   = ui_r_log
+        orch.writer_agent._log     = ui_w_log
 
         result = orch.run(url)
 
@@ -101,7 +116,8 @@ if run_btn:
     # ── Results ───────────────────────────────────────────────────────────────
     status_icon = "✅" if result.status == "success" else "❌"
     st.subheader(f"{status_icon} Pipeline result — {result.status.upper()}")
-    st.caption(f"Completed in {result.duration_sec:.1f}s")
+    if result.duration_sec is not None:
+        st.caption(f"Completed in {result.duration_sec:.1f}s")
 
     if result.transcript_result and result.transcript_result.status == "success":
         t = result.transcript_result
@@ -130,12 +146,6 @@ if run_btn:
         st.subheader("📋 Planner decision")
 
         if p.formats_chosen:
-            format_icons = {
-                "linkedin_post":    "💼 LinkedIn Post",
-                "linkedin_article": "📝 LinkedIn Article",
-                "twitter_thread":   "🐦 Twitter Thread",
-                "blog_post":        "📖 Blog Post",
-            }
             cols = st.columns(len(p.formats_chosen))
             for i, fmt in enumerate(p.formats_chosen):
                 cols[i].success(format_icons.get(fmt, fmt))
@@ -146,13 +156,6 @@ if run_btn:
 
     elif result.planner_result and result.planner_result.status == "failed":
         st.error(f"Planner Agent failed: {result.planner_result.error}")
-
-    format_icons = {
-        "linkedin_post":    "💼 LinkedIn Post",
-        "linkedin_article": "📝 LinkedIn Article",
-        "twitter_thread":   "🐦 Twitter Thread",
-        "blog_post":        "📖 Blog Post",
-    }
 
     if result.research_result and result.research_result.status == "success":
         with st.expander("🔬 Research briefs", expanded=False):

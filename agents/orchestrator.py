@@ -8,6 +8,7 @@ from agents.transcript_agent import TranscriptAgent
 from agents.planner_agent import PlannerAgent
 from agents.research_agent import ResearchAgent
 from agents.writer_agent import WriterAgent
+from agents.reviewer_agent import ReviewerAgent
 
 
 class Orchestrator:
@@ -17,7 +18,7 @@ class Orchestrator:
         self.planner_agent    = PlannerAgent(verbose=verbose)
         self.research_agent   = ResearchAgent(verbose=verbose)
         self.writer_agent     = WriterAgent(verbose=verbose)
-        self.reviewer_agent   = None
+        self.reviewer_agent   = ReviewerAgent(verbose=verbose)
         self.publisher_agent  = None
         self.verbose          = verbose
 
@@ -137,8 +138,29 @@ class Orchestrator:
         return result
 
     def _run_reviewer_stage(self, result):
-        # ReviewerAgent not built yet — skip silently
-        self._log("Stage 5 — ReviewerAgent (not built yet, skipping)")
+        self._log("Stage 5 — ReviewerAgent")
+
+        if not result.writer_result or not result.writer_result.drafts:
+            self._log("No drafts to review — skipping")
+            return result
+
+        drafts         = result.writer_result.drafts
+        formats_chosen = result.planner_result.formats_chosen
+
+        review_result = self.reviewer_agent.run(drafts, formats_chosen)
+        result.review_result = review_result
+        result.full_log.extend(review_result.logs)
+
+        if review_result.status == STATUS_FAILED:
+            self._log("ReviewerAgent failed — using writer drafts as approved")
+            result.approved_content = drafts
+            result.status = "partial"
+        else:
+            result.approved_content = review_result.approved
+            self._log(f"Approved: {list(review_result.approved.keys())}")
+            if review_result.warnings:
+                self._log(f"Warnings: {review_result.warnings}")
+
         return result
 
     def _run_publisher_stage(self, result):

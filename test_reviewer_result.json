@@ -1,0 +1,30 @@
+{
+  "status": "success",
+  "approved": {
+    "linkedin_post": "I just wasted 6 months building a product nobody wanted.\n\nI assumed I knew what the market needed. I never asked a single customer.\n\nHere is what I learned the hard way:\n\nTalk to customers BEFORE writing code. Every day you skip this step \nis a day you might be building the wrong thing.\n\nWhat is the",
+    "twitter_thread": "1/ I built 10 startups over 15 years.\nHere are the 3 lessons that actually mattered. 🧵 Thread:\n\n2/ Talk to customers before writing a single line of code.\nI wasted 6 months on a product nobody wanted.\n\n3/ Hire for attitude, not just skill.\nEngineers who care about the problem are worth 10x those who"
+  },
+  "revision_counts": {
+    "linkedin_post": 0,
+    "twitter_thread": 0
+  },
+  "warnings": {},
+  "logs": [
+    {
+      "agent": "reviewer_agent",
+      "step": "review_format",
+      "detail": "linkedin_post",
+      "outcome": "success",
+      "error_type": null,
+      "message": "revisions=0 warning=False"
+    },
+    {
+      "agent": "reviewer_agent",
+      "step": "review_format",
+      "detail": "twitter_thread",
+      "outcome": "success",
+      "error_type": null,
+      "message": "revisions=0 warning=False"
+    }
+  ]
+}

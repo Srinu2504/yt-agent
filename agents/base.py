@@ -53,10 +53,11 @@ class WriterResult:
 @dataclass
 class ReviewResult:
     status: str
-    approved: dict             = field(default_factory=dict)
-    revision_counts: dict      = field(default_factory=dict)
-    error: Optional[str]       = None
-    logs: List[StepLog]        = field(default_factory=list)
+    approved: dict           = field(default_factory=dict)
+    revision_counts: dict    = field(default_factory=dict)
+    warnings: dict           = field(default_factory=dict)
+    error: Optional[str]     = None
+    logs: List[StepLog]      = field(default_factory=list)
 
 @dataclass
 class PublisherResult:

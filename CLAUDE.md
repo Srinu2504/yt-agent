@@ -54,6 +54,24 @@ cd C:\Users\user\Downloads\yt-agent
 venv\Scripts\activate
 python -m streamlit run ui/app.py
 
+## IMPORTANT — requirements.txt rule
+NEVER run pip freeze > requirements.txt in this project.
+pip freeze captures ALL globally installed packages including 
+Windows-only packages (pywin32, tensorflow, mediapipe) that 
+break Railway Linux builds.
+
+The requirements.txt must only contain these 7 packages:
+groq
+yt-dlp
+python-dotenv
+pydub
+streamlit
+fpdf2
+requests
+
+To add a new package: manually add it to requirements.txt with its version.
+To find version: pip show package-name
+
 ## How to test individual agents
 python test_transcript_agent.py "https://www.youtube.com/watch?v=jNQXAC9IVRw"
 python test_planner_agent.py

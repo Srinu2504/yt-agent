@@ -24,7 +24,7 @@ with st.sidebar:
     - ✅ **Agent 2** — Planner
     - ✅ **Agent 3** — Research
     - ✅ **Agent 4** — Writer
-    - ⬜ Agent 5 — Reviewer
+    - ✅ **Agent 5** — Reviewer
     - ⬜ Agent 6 — Publisher
     """)
 
@@ -164,14 +164,70 @@ if run_btn:
                 st.caption(brief)
                 st.divider()
 
-    if result.writer_result and result.writer_result.status == "success":
-        st.subheader("✍️ Generated content")
+    if result.review_result and result.review_result.status == "success":
+        st.subheader("✅ Reviewed + approved content")
+        st.caption("Content has been reviewed and approved by the Reviewer Agent")
+
+        for fmt, content in result.review_result.approved.items():
+            icon_label = format_icons.get(fmt, fmt)
+            revisions  = result.review_result.revision_counts.get(fmt, 0)
+            warning    = result.review_result.warnings.get(fmt, "")
+
+            revision_badge = ""
+            if revisions == 0:
+                revision_badge = "✅ Passed first review"
+            elif revisions == 1:
+                revision_badge = "🔄 Revised once"
+            else:
+                revision_badge = f"🔄 Revised {revisions} times"
+
+            with st.expander(f"{icon_label}", expanded=True):
+                st.caption(revision_badge)
+                if warning:
+                    st.warning(f"⚠️ Quality note: {warning}")
+                st.markdown(content)
+                st.caption(
+                    f"Words: {len(content.split())} · "
+                    f"Characters: {len(content)}"
+                )
+                st.divider()
+                c1, c2 = st.columns(2)
+                with c1:
+                    st.download_button(
+                        "⬇️ TXT",
+                        content.encode("utf-8"),
+                        file_name=f"{fmt}.txt",
+                        mime="text/plain",
+                        use_container_width=True,
+                        key=f"dl_txt_{fmt}"
+                    )
+                with c2:
+                    if st.button(
+                        "📋 Copy",
+                        use_container_width=True,
+                        key=f"copy_{fmt}"
+                    ):
+                        st.code(content, language=None)
+
+        if result.review_result.warnings:
+            with st.expander("⚠️ Quality warnings", expanded=False):
+                for fmt, warning in result.review_result.warnings.items():
+                    st.caption(
+                        f"**{format_icons.get(fmt, fmt)}**: {warning}"
+                    )
+
+    elif result.writer_result and result.writer_result.status == "success":
+        st.subheader("✍️ Generated content (unreviewed)")
+        st.caption("Reviewer Agent could not run — showing raw drafts")
 
         for fmt, draft in result.writer_result.drafts.items():
             icon_label = format_icons.get(fmt, fmt)
             with st.expander(f"{icon_label}", expanded=True):
                 st.markdown(draft)
-                st.caption(f"Words: {len(draft.split())} · Characters: {len(draft)}")
+                st.caption(
+                    f"Words: {len(draft.split())} · "
+                    f"Characters: {len(draft)}"
+                )
                 st.divider()
                 c1, c2 = st.columns(2)
                 with c1:
@@ -184,7 +240,11 @@ if run_btn:
                         key=f"dl_txt_{fmt}"
                     )
                 with c2:
-                    if st.button("📋 Copy", use_container_width=True, key=f"copy_{fmt}"):
+                    if st.button(
+                        "📋 Copy",
+                        use_container_width=True,
+                        key=f"copy_{fmt}"
+                    ):
                         st.code(draft, language=None)
 
         if result.writer_result.failed_formats:

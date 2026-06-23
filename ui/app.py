@@ -25,7 +25,7 @@ with st.sidebar:
     - ✅ **Agent 3** — Research
     - ✅ **Agent 4** — Writer
     - ✅ **Agent 5** — Reviewer
-    - ⬜ Agent 6 — Publisher
+    - ✅ **Agent 6** — Publisher
     """)
 
     st.divider()
@@ -104,10 +104,18 @@ if run_btn:
         def ui_w_log(msg):
             append_log(f"[Writer]     {msg}")
 
+        def ui_rev_log(msg):
+            append_log(f"[Reviewer]   {msg}")
+
+        def ui_pub_log(msg):
+            append_log(f"[Publisher]  {msg}")
+
         orch.transcript_agent._log = ui_t_log
         orch.planner_agent._log    = ui_p_log
         orch.research_agent._log   = ui_r_log
         orch.writer_agent._log     = ui_w_log
+        orch.reviewer_agent._log   = ui_rev_log
+        orch.publisher_agent._log  = ui_pub_log
 
         result = orch.run(url)
 
@@ -254,6 +262,53 @@ if run_btn:
 
     elif result.writer_result and result.writer_result.status == "failed":
         st.error(f"Writer Agent failed: {result.writer_result.error}")
+
+    if result.publisher_result and result.publisher_result.status == "success":
+        st.subheader("📦 Published")
+        p = result.publisher_result
+
+        col1, col2 = st.columns(2)
+        col1.metric("Formats published", len(p.exports))
+        col2.metric("DB ID", p.video_db_id[:8] + "..." if p.video_db_id else "N/A")
+
+        for fmt, files in p.exports.items():
+            icon_label = format_icons.get(fmt, fmt)
+            st.markdown(f"**{icon_label}**")
+            ec1, ec2, ec3 = st.columns(3)
+
+            from core.export_engine import get_export_bytes
+
+            with ec1:
+                if "txt" in files:
+                    st.download_button(
+                        "⬇️ TXT",
+                        get_export_bytes(files["txt"]),
+                        file_name=f"{fmt}.txt",
+                        mime="text/plain",
+                        use_container_width=True,
+                        key=f"pub_txt_{fmt}"
+                    )
+            with ec2:
+                if "pdf" in files:
+                    st.download_button(
+                        "⬇️ PDF",
+                        get_export_bytes(files["pdf"]),
+                        file_name=f"{fmt}.pdf",
+                        mime="application/pdf",
+                        use_container_width=True,
+                        key=f"pub_pdf_{fmt}"
+                    )
+            with ec3:
+                if "docx" in files:
+                    st.download_button(
+                        "⬇️ DOCX",
+                        get_export_bytes(files["docx"]),
+                        file_name=f"{fmt}.docx",
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        use_container_width=True,
+                        key=f"pub_docx_{fmt}"
+                    )
+        st.divider()
 
     # ── Full agent log ─────────────────────────────────────────────────────
     if result.full_log:

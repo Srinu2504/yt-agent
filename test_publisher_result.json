@@ -1,0 +1,42 @@
+{
+  "status": "success",
+  "video_db_id": "e1a807ac-a269-4e17-aa0b-a52cfd49b80f",
+  "exports": {
+    "linkedin_post": {
+      "txt": "C:\\Users\\user\\Downloads\\yt-agent\\data\\exports\\3_Startup_Lessons_I_Learned_the_Hard_Way_linkedin_post.txt",
+      "pdf": "C:\\Users\\user\\Downloads\\yt-agent\\data\\exports\\3_Startup_Lessons_I_Learned_the_Hard_Way_linkedin_post.pdf",
+      "docx": "C:\\Users\\user\\Downloads\\yt-agent\\data\\exports\\3_Startup_Lessons_I_Learned_the_Hard_Way_linkedin_post.docx"
+    },
+    "twitter_thread": {
+      "txt": "C:\\Users\\user\\Downloads\\yt-agent\\data\\exports\\3_Startup_Lessons_I_Learned_the_Hard_Way_twitter_thread.txt",
+      "pdf": "C:\\Users\\user\\Downloads\\yt-agent\\data\\exports\\3_Startup_Lessons_I_Learned_the_Hard_Way_twitter_thread.pdf",
+      "docx": "C:\\Users\\user\\Downloads\\yt-agent\\data\\exports\\3_Startup_Lessons_I_Learned_the_Hard_Way_twitter_thread.docx"
+    }
+  },
+  "logs": [
+    {
+      "agent": "publisher_agent",
+      "step": "save_video",
+      "detail": "3 Startup Lessons I Learned the Hard Way",
+      "outcome": "success",
+      "error_type": null,
+      "message": "db_id=e1a807ac-a269-4e17-aa0b-a52cfd49b80f"
+    },
+    {
+      "agent": "publisher_agent",
+      "step": "export_format",
+      "detail": "linkedin_post",
+      "outcome": "success",
+      "error_type": null,
+      "message": "exports=['txt', 'pdf', 'docx']"
+    },
+    {
+      "agent": "publisher_agent",
+      "step": "export_format",
+      "detail": "twitter_thread",
+      "outcome": "success",
+      "error_type": null,
+      "message": "exports=['txt', 'pdf', 'docx']"
+    }
+  ]
+}

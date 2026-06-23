@@ -9,6 +9,7 @@ from agents.planner_agent import PlannerAgent
 from agents.research_agent import ResearchAgent
 from agents.writer_agent import WriterAgent
 from agents.reviewer_agent import ReviewerAgent
+from agents.publisher_agent import PublisherAgent
 
 
 class Orchestrator:
@@ -19,7 +20,7 @@ class Orchestrator:
         self.research_agent   = ResearchAgent(verbose=verbose)
         self.writer_agent     = WriterAgent(verbose=verbose)
         self.reviewer_agent   = ReviewerAgent(verbose=verbose)
-        self.publisher_agent  = None
+        self.publisher_agent  = PublisherAgent(verbose=verbose)
         self.verbose          = verbose
 
     def _log(self, msg: str):
@@ -164,6 +165,37 @@ class Orchestrator:
         return result
 
     def _run_publisher_stage(self, result):
-        # PublisherAgent not built yet — skip silently
-        self._log("Stage 6 — PublisherAgent (not built yet, skipping)")
+        self._log("Stage 6 — PublisherAgent")
+
+        approved_content = result.approved_content
+        if not approved_content and result.writer_result:
+            approved_content = result.writer_result.drafts
+
+        if not approved_content:
+            self._log("No content to publish — skipping")
+            result.status = STATUS_SUCCESS
+            return result
+
+        tr = result.transcript_result
+
+        publisher_result = self.publisher_agent.run(
+            video_id         = tr.video_id,
+            youtube_url      = tr.url,
+            title            = tr.title,
+            channel          = tr.channel,
+            duration_sec     = tr.duration_sec,
+            transcript       = tr.transcript,
+            approved_content = approved_content,
+        )
+
+        result.publisher_result = publisher_result
+        result.full_log.extend(publisher_result.logs)
+
+        if publisher_result.status == STATUS_FAILED:
+            self._log("PublisherAgent failed — content still available in memory")
+            result.status = "partial"
+        else:
+            result.status = STATUS_SUCCESS
+            self._log(f"Published: {list(publisher_result.exports.keys())}")
+
         return result
